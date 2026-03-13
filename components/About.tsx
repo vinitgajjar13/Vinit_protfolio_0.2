@@ -36,7 +36,7 @@ const About: React.FC = () => {
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
               <p className="text-2xl md:text-3xl leading-relaxed text-slate-800 font-light italic mb-16 border-l-4 border-slate-900/20 pl-8">
-                "I have a strong foundation in Flutter, HTML, and CSS. My goal is to bridge the gap between aesthetics and functionality, creating collaborative environments where user experience comes first."
+                "I have a strong foundation in UI/UX Design, HTML, and CSS. My goal is to bridge the gap between aesthetics and functionality, creating collaborative environments where user experience comes first."
               </p>
               
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6">

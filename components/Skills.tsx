@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -29,22 +28,22 @@ const Skills: React.FC = () => {
   ];
 
   return (
-    <section id="skills" className="py-24 px-6 bg-[#FDF5E6] relative border-b-2 border-slate-300">
+    <section id="skills" className="py-20 md:py-24 px-4 md:px-6 bg-[#FDF5E6] relative border-b-2 border-slate-300">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-16 pb-8 border-b-2 red-wine-border">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 pb-6 md:pb-8 border-b-2 red-wine-border gap-4">
           <div>
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-2 block">capabilities</span>
-            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter red-wine-text">Expertise Index</h2>
+            <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter red-wine-text">Expertise Index</h2>
           </div>
-          <p className="text-sm font-bold max-w-xs text-right hidden md:block text-slate-500 uppercase tracking-widest leading-tight">
+          <p className="text-xs md:text-sm font-bold max-w-xs md:text-right text-slate-500 uppercase tracking-widest leading-tight">
             Comprehensive knowledge in <span className="red-wine-text">mobile ecosystems</span> and modern web standards.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
           
           {/* Left Column: Interactive Tab List */}
-          <div className="lg:col-span-4 flex flex-col gap-4">
+          <div className="lg:col-span-4 flex flex-col gap-3 md:gap-4">
             {skillGroups.map((group, idx) => {
               const isActive = activeIndex === idx;
               return (
@@ -53,12 +52,12 @@ const Skills: React.FC = () => {
                   onClick={() => setActiveIndex(idx)}
                   className={`text-left w-full relative overflow-hidden group border-2 transition-all duration-500 ${
                     isActive 
-                      ? 'bg-[#722F37] border-[#722F37] text-[#FDF5E6] shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)] scale-[1.02]' 
+                      ? 'bg-[#722F37] border-[#722F37] text-[#FDF5E6] shadow-[6px_6px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)] scale-[1.01] md:scale-[1.02]' 
                       : 'bg-transparent border-slate-300 text-slate-600 hover:border-[#722F37] hover:bg-[#722F37]/5'
                   }`}
                 >
-                  <div className="px-6 py-5 flex items-center justify-between relative z-10 text-xl font-black uppercase tracking-widest">
-                    <div className="flex items-center gap-4">
+                  <div className="px-5 md:px-6 py-4 md:py-5 flex items-center justify-between relative z-10 text-lg md:text-xl font-black uppercase tracking-widest">
+                    <div className="flex items-center gap-3 md:gap-4">
                       <motion.span 
                         animate={isActive ? { rotate: [0, -10, 10, 0] } : {}}
                         transition={isActive ? { duration: 0.5 } : {}}
@@ -69,7 +68,7 @@ const Skills: React.FC = () => {
                       <span>{group.category}</span>
                     </div>
                     {/* Active Indicator Arrow */}
-                    <span className={`text-2xl transition-transform duration-500 ${isActive ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}>
+                    <span className={`text-xl md:text-2xl transition-transform duration-500 ${isActive ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}>
                       →
                     </span>
                   </div>
@@ -84,35 +83,35 @@ const Skills: React.FC = () => {
           </div>
 
           {/* Right Column: Animated Content Panel */}
-          <div className="lg:col-span-8 bg-white border-2 red-wine-border rounded-sm p-8 md:p-12 shadow-[15px_15px_0px_0px_rgba(114,47,55,0.05)] relative min-h-[400px]">
+          <div className="lg:col-span-8 bg-white border-2 red-wine-border rounded-sm p-6 md:p-12 shadow-[8px_8px_0px_0px_rgba(114,47,55,0.05)] md:shadow-[15px_15px_0px_0px_rgba(114,47,55,0.05)] relative min-h-[350px] md:min-h-[400px]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeIndex}
-                initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
+                initial={{ opacity: 0, y: 15, filter: 'blur(8px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
+                exit={{ opacity: 0, y: -15, filter: 'blur(8px)' }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
                 className="w-full h-full"
                 style={{ willChange: "transform, opacity, filter" }}
               >
                 
-                <div className="flex items-center gap-4 mb-10 border-b border-slate-200 pb-6">
-                  <span className="p-3 bg-[#722F37] text-white rounded-md shadow-inner">
+                <div className="flex items-center gap-4 mb-8 md:mb-10 border-b border-slate-200 pb-5 md:pb-6">
+                  <span className="p-2.5 md:p-3 bg-[#722F37] text-white rounded-md shadow-inner">
                     {skillGroups[activeIndex].icon}
                   </span>
                   <div>
-                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Vol. {activeIndex + 1} / 4</span>
-                     <h3 className="text-3xl font-black uppercase tracking-tight red-wine-text">{skillGroups[activeIndex].category}</h3>
+                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-0.5 md:mb-1">Vol. {activeIndex + 1} / 4</span>
+                     <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight red-wine-text">{skillGroups[activeIndex].category}</h3>
                   </div>
                 </div>
 
                 <motion.ul 
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 md:gap-x-8 gap-y-4 md:gap-y-6"
                   variants={{
                     hidden: { opacity: 0 },
                     visible: {
                       opacity: 1,
-                      transition: { staggerChildren: 0.1 }
+                      transition: { staggerChildren: 0.08 }
                     }
                   }}
                   initial="hidden"
@@ -122,19 +121,19 @@ const Skills: React.FC = () => {
                     <motion.li
                       key={skill}
                       variants={{
-                        hidden: { opacity: 0, x: -20 },
+                        hidden: { opacity: 0, x: -15 },
                         visible: { opacity: 1, x: 0 }
                       }}
-                      className="flex items-center text-lg font-bold text-slate-700 group cursor-default"
+                      className="flex items-center text-base md:text-lg font-bold text-slate-700 group cursor-default"
                     >
-                      <span className="w-8 flex-shrink-0 text-slate-300 font-mono text-xs hidden sm:inline-block">
+                      <span className="w-6 md:w-8 flex-shrink-0 text-slate-300 font-mono text-[10px] md:text-xs">
                         {(idx + 1).toString().padStart(2, '0')}.
                       </span>
                       <motion.div 
                         whileHover={{ scale: 1.5 }}
-                        className="w-2 h-2 red-wine-bg mr-4 transition-colors group-hover:bg-slate-900" 
+                        className="w-1.5 md:w-2 h-1.5 md:h-2 red-wine-bg mr-3 md:mr-4 transition-colors group-hover:bg-slate-900" 
                       />
-                      <span className="group-hover:translate-x-2 group-hover:red-wine-text transition-all duration-300">
+                      <span className="group-hover:translate-x-1 md:group-hover:translate-x-2 group-hover:red-wine-text transition-all duration-300">
                         {skill}
                       </span>
                     </motion.li>
