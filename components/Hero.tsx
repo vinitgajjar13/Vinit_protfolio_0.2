@@ -161,7 +161,7 @@ const Hero: React.FC = () => {
             >
               Karshala <br />
               <motion.span 
-                initial={{ backgroundPosition: "0% 50%" }}
+                initial={{ backgroundPosition: "50% 50%" }}
                 animate={{ backgroundPosition: "100% 50%" }}
                 transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
                 className="red-wine-text bg-gradient-to-r from-[#722F37] via-[#a64450] to-[#722F37] bg-[length:200%_auto] bg-clip-text text-transparent"

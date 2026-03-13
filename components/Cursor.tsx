@@ -1,62 +1,66 @@
-import React, { useEffect, useState } from 'react';
-import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState, useRef } from 'react';
+import { motion, useMotionValue, useSpring, useVelocity, useTransform, AnimatePresence } from 'framer-motion';
 
 const Cursor: React.FC = () => {
-  const [isHovering, setIsHovering] = useState(false);
+  const [hoverType, setHoverType] = useState<'none' | 'link' | 'project'>('none');
   const [isVisible, setIsVisible] = useState(false);
-
-  // Motion values
+  
+  // Mouse position
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
 
-  // Springs for the main dot (fast) and the follower blob (slower for the gooey effect)
-  const mainX = useSpring(mouseX, { damping: 25, stiffness: 400, mass: 0.1 });
-  const mainY = useSpring(mouseY, { damping: 25, stiffness: 400, mass: 0.1 });
+  // Velocity tracking
+  const xVelocity = useVelocity(mouseX);
+  const yVelocity = useVelocity(mouseY);
   
-  const blobX = useSpring(mouseX, { damping: 15, stiffness: 150, mass: 0.8 });
-  const blobY = useSpring(mouseY, { damping: 15, stiffness: 150, mass: 0.8 });
+  // Calculate total velocity for stretching
+  const combinedVelocity = useTransform([xVelocity, yVelocity], ([vx, vy]) => {
+    return Math.sqrt(Math.pow(Number(vx), 2) + Math.pow(Number(vy), 2));
+  });
+
+  // Transform velocity into scale and rotation
+  const stretch = useTransform(combinedVelocity, [0, 3000], [1, 2.5]);
+  const angle = useTransform([xVelocity, yVelocity], ([vx, vy]) => {
+    return Math.atan2(Number(vy), Number(vx)) * (180 / Math.PI);
+  });
+
+  // Springs for smooth movement
+  const springConfig = { damping: 30, stiffness: 300, mass: 0.5 };
+  const smoothX = useSpring(mouseX, springConfig);
+  const smoothY = useSpring(mouseY, springConfig);
 
   useEffect(() => {
-    // Hide default cursor
     document.documentElement.style.cursor = 'none';
     const style = document.createElement('style');
     style.innerHTML = `* { cursor: none !important; }`;
     document.head.appendChild(style);
 
-    const updateMousePosition = (e: MouseEvent) => {
+    const moveMouse = (e: MouseEvent) => {
       setIsVisible(true);
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
     };
 
-    const handleMouseLeave = () => setIsVisible(false);
-    const handleMouseEnter = () => setIsVisible(true);
-
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const isClickable = 
-        target.tagName.toLowerCase() === 'a' ||
-        target.tagName.toLowerCase() === 'button' ||
-        target.closest('a') !== null ||
-        target.closest('button') !== null ||
-        target.onclick !== null ||
-        window.getComputedStyle(target).cursor === 'pointer';
-      
-      setIsHovering(isClickable);
+      if (target.closest('a') || target.closest('button')) {
+        setHoverType('link');
+      } else if (target.closest('.group') || target.closest('[id="projects"]')) {
+        setHoverType('project');
+      } else {
+        setHoverType('none');
+      }
     };
 
-    window.addEventListener('mousemove', updateMousePosition);
-    window.addEventListener('mouseleave', handleMouseLeave);
-    window.addEventListener('mouseenter', handleMouseEnter);
-    document.addEventListener('mouseover', handleMouseOver);
+    window.addEventListener('mousemove', moveMouse);
+    window.addEventListener('mouseover', handleMouseOver);
+    window.addEventListener('mouseenter', () => setIsVisible(true));
+    window.addEventListener('mouseleave', () => setIsVisible(false));
 
     return () => {
-      window.removeEventListener('mousemove', updateMousePosition);
-      window.removeEventListener('mouseleave', handleMouseLeave);
-      window.removeEventListener('mouseenter', handleMouseEnter);
-      document.removeEventListener('mouseover', handleMouseOver);
-      
-      document.documentElement.style.cursor = '';
+      window.removeEventListener('mousemove', moveMouse);
+      window.removeEventListener('mouseover', handleMouseOver);
+      document.documentElement.style.cursor = 'auto';
       if (document.head.contains(style)) document.head.removeChild(style);
     };
   }, [mouseX, mouseY]);
@@ -64,99 +68,114 @@ const Cursor: React.FC = () => {
   if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return null;
 
   return (
-    <>
-      {/* SVG gooey filter definition */}
+    <div className="fixed inset-0 pointer-events-none z-[999999] overflow-hidden">
+      {/* Liquid Gooey Filter Definition */}
       <svg className="hidden">
         <defs>
-          <filter id="goo">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+          <filter id="liquid-filter">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
             <feColorMatrix 
               in="blur" 
               mode="matrix" 
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" 
-              result="goo" 
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -10" 
+              result="liquid" 
             />
-            <feBlend in="SourceGraphic" in2="goo" />
           </filter>
         </defs>
       </svg>
 
-      <motion.div 
-        className="fixed pointer-events-none z-[9999] hidden md:block mix-blend-difference text-white"
-        style={{ 
-          filter: "url(#goo)",
-          x: blobX,
-          y: blobY,
-          translateX: '-50%',
-          translateY: '-50%',
-          width: 100,
-          height: 100,
-          willChange: 'transform'
-        }}
-      >
-        {/* Follower Blob */}
+      <div style={{ filter: 'url(#liquid-filter)' }} className="w-full h-full relative">
+        {/* Main Trailing Liquid Body */}
         <motion.div
-          className="absolute bg-white rounded-full top-1/2 left-1/2"
+          className="absolute bg-white mix-blend-difference"
           style={{
+            x: smoothX,
+            y: smoothY,
             translateX: '-50%',
             translateY: '-50%',
-            width: 24,
-            height: 24,
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
             opacity: isVisible ? 1 : 0,
-            willChange: 'transform, opacity'
+            scaleX: stretch,
+            rotate: angle,
           }}
           animate={{
-            scale: isHovering ? 2.5 : 1,
-          }}
-          transition={{ duration: 0.3 }}
-        />
-        
-        {/* Main Dot */}
-        <motion.div
-          className="absolute bg-white rounded-full top-1/2 left-1/2"
-          style={{
-            x: useSpring(useMotionValue(0), { damping: 25, stiffness: 400, mass: 0.1 }), // Offset for main dot
-            y: useSpring(useMotionValue(0), { damping: 25, stiffness: 400, mass: 0.1 }),
-            translateX: '-50%',
-            translateY: '-50%',
-            width: 12,
-            height: 12,
-            opacity: isVisible ? 1 : 0,
-            willChange: 'transform, opacity'
-          }}
-          animate={{
-            scale: isHovering ? 0 : 1,
+            scale: hoverType === 'link' ? 3 : hoverType === 'project' ? 4 : 1,
+            backgroundColor: hoverType === 'link' ? '#fff' : '#fff',
           }}
           transition={{ duration: 0.2 }}
         />
-      </motion.div>
 
-      {/* Explore / View Label - outside filter so text doesn't get gooey/unreadable */}
+        {/* Inner Core Dot (stays more localized) */}
+        <motion.div
+           className="absolute bg-white mix-blend-difference rounded-full"
+           style={{
+             x: mouseX,
+             y: mouseY,
+             translateX: '-50%',
+             translateY: '-50%',
+             width: 8,
+             height: 8,
+             opacity: isVisible ? 0.8 : 0,
+           }}
+           animate={{
+             scale: hoverType !== 'none' ? 0 : 1,
+           }}
+        />
+        
+        {/* Extra "Drip" for faster movements */}
+        <motion.div
+           className="absolute bg-white/40 mix-blend-difference rounded-full"
+           style={{
+              x: useSpring(mouseX, { damping: 45, stiffness: 200, mass: 1 }),
+              y: useSpring(mouseY, { damping: 45, stiffness: 200, mass: 1 }),
+              translateX: '-50%',
+              translateY: '-50%',
+              width: 16,
+              height: 16,
+           }}
+        />
+      </div>
+
+      {/* Non-Filter Labels (Text and Icons) */}
       <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-[10000] mix-blend-difference text-[#FDF5E6] hidden md:flex items-center justify-center font-bold text-[10px] uppercase tracking-wider"
+        className="absolute top-0 left-0 flex items-center justify-center font-black uppercase text-white mix-blend-difference"
         style={{
-          x: blobX,
-          y: blobY,
+          x: smoothX,
+          y: smoothY,
           translateX: '-50%',
           translateY: '-50%',
-          width: 60,
-          height: 60,
+          width: 80,
+          height: 80,
         }}
       >
         <AnimatePresence>
-          {isHovering && (
-            <motion.span
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0 }}
-              transition={{ duration: 0.2, delay: 0.1 }}
+          {hoverType === 'project' && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.4, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.4, y: 10 }}
+              className="flex flex-col items-center gap-1"
             >
-             
-            </motion.span>
+              
+              
+            </motion.div>
+          )}
+          {hoverType === 'link' && (
+             <motion.div
+               initial={{ rotate: -45, scale: 0 }}
+               animate={{ rotate: 0, scale: 1 }}
+               exit={{ rotate: 45, scale: 0 }}
+             >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 17l10-10M7 7h10v10" />
+                </svg>
+             </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
-    </>
+    </div>
   );
 };
 
